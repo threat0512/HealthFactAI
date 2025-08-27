@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+ENV/
+env/
+.venv/
+
+# SQLite database (optional: ignore if you don’t want to share db file)
+*.db
+
+# VSCode / IDE settings
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+Thumbs.db
