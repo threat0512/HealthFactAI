@@ -38,6 +38,14 @@ CUSTOM_CSS = f"""
 }}
 .btn-primary {{ background: {PRIMARY}; color:#04120D; border: none; }}
 
+/* Make nav buttons even */
+.nav-row .stButton>button {{
+    width: 100%;
+    white-space: nowrap;
+    height: 44px;
+    border-radius: 12px;
+}}
+
 /* Search bar */
 .hf-search {{
     background:#0F1418; border:1px solid #1F2937; border-radius:14px; padding:10px 12px;
@@ -67,6 +75,16 @@ CUSTOM_CSS = f"""
 .right-card {{
     background:#0F1418; border:1px solid #1F2937; border-radius:16px; padding:16px; margin-bottom:14px;
 }}
+
+/* Hero */
+.hero {{ text-align:center; padding: 16px 0 8px 0; }}
+.hero-title {{ font-size:34px; font-weight:800; margin-bottom:4px; }}
+.hero-subtitle {{ color:#AEB4BE; }}
+.feature-card {{
+    background: #0F1418; border:1px solid #1F2937; border-radius:16px; padding:14px; margin:8px 0;
+}}
+.feature-title {{ font-weight:700; }}
+.tag {{ display:inline-block; font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid #263241; margin-right:6px; color:#C4CBD6; }}
 </style>
 """
 
@@ -78,9 +96,11 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 if "active_category" not in st.session_state:
     st.session_state.active_category = "All"
 if "page" not in st.session_state:
-    st.session_state.page = "Home"
+    st.session_state.page = "Landing"
 if "claims" not in st.session_state:
     st.session_state.claims = []
+if "user" not in st.session_state:
+    st.session_state.user = None
 
 categories = ["All", "Nutrition", "Exercise", "Mental Health", "Wellness"]
 
@@ -99,46 +119,117 @@ def render_header() -> None:
             unsafe_allow_html=True,
         )
     with col2:
-        nav_cols = st.columns([1,1,1,1,1])
-        with nav_cols[0]:
-            if st.button("Home", key="nav-home"):
-                st.session_state.page = "Home"
-        with nav_cols[1]:
-            if st.button("Categories", key="nav-categories"):
-                st.session_state.page = "Categories"
-        with nav_cols[2]:
-            if st.button("Quiz", key="nav-quiz"):
-                st.session_state.page = "Quiz"
-                st.session_state["start_quiz"] = True
-        with nav_cols[3]:
-            if st.button("My Progress", key="nav-progress"):
-                st.session_state.page = "My Progress"
-        with nav_cols[4]:
-            if st.button("Admin", key="nav-admin"):
-                st.session_state.page = "Admin"
+        spacer_l, nav_container, spacer_r = st.columns([1, 12, 1])
+        with nav_container:
+            st.markdown("<div class='nav-row'>", unsafe_allow_html=True)
+            nav_cols = st.columns(5, gap="small")
+            with nav_cols[0]:
+                if st.button("Home", key="nav-home", use_container_width=True):
+                    st.session_state.page = "Home" if st.session_state.user else "Landing"
+            with nav_cols[1]:
+                if st.button("Categories", key="nav-categories", use_container_width=True):
+                    st.session_state.page = "Categories"
+            with nav_cols[2]:
+                if st.button("Quiz", key="nav-quiz", use_container_width=True):
+                    if st.session_state.user:
+                        st.session_state.page = "Quiz"
+                        st.session_state["start_quiz"] = True
+                    else:
+                        st.session_state.page = "Auth"
+            with nav_cols[3]:
+                if st.button("Progress", key="nav-progress", use_container_width=True):
+                    st.session_state.page = "Progress"
+            with nav_cols[4]:
+                if st.button("Admin", key="nav-admin", use_container_width=True):
+                    st.session_state.page = "Admin" if st.session_state.user else "Auth"
+            st.markdown("</div>", unsafe_allow_html=True)
     with col3:
-        st.markdown(
-            """
-            <div class="hf-header">
-              <div class="hf-actions">
-                <span class="btn">Login</span>
-                <span class="btn btn-primary">Sign Up</span>
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        if st.session_state.user:
+            if st.button("Logout"):
+                st.session_state.user = None
+                st.session_state.page = "Landing"
+        else:
+            c1, c2 = st.columns(2)
+            with c1:
+                if st.button("Login"):
+                    st.session_state.page = "Auth"
+            with c2:
+                if st.button("Sign Up"):
+                    st.session_state.page = "Auth"
 
 
 def render_search() -> str:
     query = st.text_input("", placeholder="Search health facts, topics, or ask a question...", label_visibility="collapsed")
-    chip_cols = st.columns(len(categories))
+    chip_cols = st.columns(len(categories), gap="small")
     for idx, name in enumerate(categories):
         with chip_cols[idx]:
             if st.button(name, key=f"chip-{name}"):
                 st.session_state.active_category = name
     return query
 
+
+def render_landing() -> None:
+    st.markdown(
+        """
+        <div class="hero">
+          <div class="hero-title">Fight Health Misinformation</div>
+          <div class="hero-subtitle">AI-powered fact-checking • Interactive learning • Trusted sources</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Features
+    col_l, col_r = st.columns(2)
+    with col_l:
+        st.markdown(
+            """
+            <div class="feature-card">
+              <div class="feature-title">Bust Health Myths</div>
+              <div style="color:#9CA3AF;">Separate fact from fiction with AI-powered analysis</div>
+              <div style="margin-top:6px;"><span class="tag">Quiz</span><span class="tag">Learn</span><span class="tag">Track</span></div>
+            </div>
+            <div class="feature-card">
+              <div class="feature-title">Interactive Learning</div>
+              <div style="color:#9CA3AF;">Gamified fact-checking</div>
+              <div style="margin-top:6px;"><span class="tag">⭐</span><span class="tag">✅</span><span class="tag">🧠</span></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col_r:
+        st.markdown(
+            """
+            <div class="feature-card">
+              <div class="feature-title">Build Media Literacy</div>
+              <div style="color:#9CA3AF;">Learn to identify reliable health information sources</div>
+              <div style="margin-top:6px;"><span class="tag">Progress: 70%</span></div>
+            </div>
+            <div class="feature-card">
+              <div class="feature-title">Accessible Everywhere</div>
+              <div style="color:#9CA3AF;">Multiple languages • Global health literacy</div>
+              <div style="margin-top:6px;"><span class="tag">EN</span><span class="tag">ES</span><span class="tag">🌐</span></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    # Centered CTA
+    c1, c2, c3 = st.columns([3,2,3])
+    with c2:
+        if st.button("Start Fact-Checking", use_container_width=True):
+            st.session_state.page = "Auth"
+
+
+def render_auth() -> None:
+    st.subheader("Sign in")
+    with st.form("auth_form"):
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
+        ok = st.form_submit_button("Continue")
+        if ok:
+            st.session_state.user = {"email": email}
+            st.session_state.page = "Home"
 
 def render_fact_card(fact: Dict) -> None:
     st.markdown(
@@ -247,8 +338,8 @@ def fetch_featured_fact(query: str) -> Dict:
         ],
     }
 
-
 def legacy_tools() -> None:
+    # Health Claim Checker
     with st.expander("Check a Health Claim"):
         claim = st.text_area("Enter a health claim:")
         if st.button("Check Claim") and claim.strip():
@@ -264,6 +355,7 @@ def legacy_tools() -> None:
             except Exception as ex:
                 st.error(f"Backend not available: {ex}")
 
+    # Quiz Mode
     with st.expander("Quiz Mode", expanded=st.session_state.get("start_quiz", False)):
         start_clicked = st.button("Start Quiz") or st.session_state.get("start_quiz", False)
         if start_clicked:
@@ -280,9 +372,11 @@ def legacy_tools() -> None:
                     st.error("Could not fetch quiz questions.")
             except Exception as ex:
                 st.error(f"Backend not available: {ex}")
-        # Reset flag after rendering so it doesn't loop
-        if st.session_state.get("start_quiz"):
-            st.session_state["start_quiz"] = False
+
+            # Reset quiz flag after rendering
+            if st.session_state.get("start_quiz"):
+                st.session_state["start_quiz"] = False
+
 
 
 # ------------------------------
@@ -290,7 +384,11 @@ def legacy_tools() -> None:
 # ------------------------------
 render_header()
 
-if st.session_state.page == "Home":
+if st.session_state.page == "Landing":
+    render_landing()
+elif st.session_state.page == "Auth":
+    render_auth()
+elif st.session_state.page == "Home":
     query = render_search()
     left, right = st.columns([2.5, 1])
     with left:
@@ -305,8 +403,8 @@ elif st.session_state.page == "Categories":
     st.info(f"Active category: {st.session_state.active_category}")
 elif st.session_state.page == "Quiz":
     legacy_tools()
-elif st.session_state.page == "My Progress":
-    st.subheader("My Progress")
+elif st.session_state.page == "Progress":
+    st.subheader("Progress")
     try:
         import pandas as pd
         import plotly.express as px
