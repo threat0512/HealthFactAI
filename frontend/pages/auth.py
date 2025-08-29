@@ -29,7 +29,8 @@ def render_auth() -> None:
                 <div style="font-size: 24px; font-weight: 700; margin-bottom: 32px; color: {colors['text']}; text-align: center;">Sign In</div>
             """, unsafe_allow_html=True)
             
-            email = st.text_input("Email", placeholder="Enter your email address")
+            # Single field for username or email
+            login_field = st.text_input("Username or Email", placeholder="Enter your username or email address")
             st.markdown("<div style='margin: 20px 0;'></div>", unsafe_allow_html=True)  # Add spacing
             
             password = st.text_input("Password", type="password", placeholder="Enter your password")
@@ -39,16 +40,36 @@ def render_auth() -> None:
             <div style="margin-top: 32px;">
             """, unsafe_allow_html=True)
             
-            ok = st.form_submit_button("Continue", type="primary", use_container_width=True)
+            ok = st.form_submit_button("Sign In", type="primary", use_container_width=True)
             
             st.markdown("</div></div>", unsafe_allow_html=True)
             
             if ok:
                 # Simple authentication - in production, you'd validate credentials
-                if email and password:
-                    set_user({"email": email, "name": "John Doe", "role": "Health Enthusiast"})
+                if login_field and password:
+                    # Determine if login_field is email or username
+                    is_email = "@" in login_field
+                    if is_email:
+                        set_user({"email": login_field, "username": "", "name": "John Doe", "role": "Health Enthusiast"})
+                    else:
+                        set_user({"username": login_field, "email": "", "name": "John Doe", "role": "Health Enthusiast"})
                     set_page("Home")
                     st.success("✅ Successfully signed in!")
                     st.rerun()  # Force rerun to update the UI
                 else:
-                    st.error("Please enter both email and password")
+                    st.error("Please enter username/email and password")
+        
+        # Sign up section below the form
+        st.markdown(f"""
+        <div style="text-align: center; margin: 20px 0;">
+            <div style="color: {colors['text_secondary']}; font-size: 16px; margin-bottom: 16px;">New here?</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Center the sign up button
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("Sign Up", key="signup-btn", use_container_width=True):
+                st.info("🚧 Sign up functionality coming soon! We're working on it.")
+                # TODO: Implement sign up page/form
+                # set_page("SignUp")  # Uncomment when sign up page is ready

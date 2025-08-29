@@ -1,6 +1,7 @@
 import requests
 from typing import Dict, List, Optional
 from config import API_URL
+import streamlit as st
 
 def fetch_featured_fact(query: str = "") -> Dict:
     """Fetch a featured health fact from the backend"""
@@ -68,7 +69,86 @@ def update_claim(claim_id: int, claim_data: Dict) -> bool:
 def is_backend_available() -> bool:
     """Check if the backend API is available"""
     try:
-        response = requests.get(f"{API_URL}/health", timeout=2)
+        response = requests.get(f"{API_URL}/api/v1/health", timeout=2)
         return response.status_code == 200
     except Exception:
         return False
+
+def get_auth_headers() -> Dict[str, str]:
+    """Get authentication headers from session state"""
+    token = st.session_state.get("access_token")
+    if token:
+        return {"Authorization": f"Bearer {token}"}
+    return {}
+
+def search_and_verify_claim(claim: str) -> Optional[Dict]:
+    """Search and verify a health claim using the new API"""
+    try:
+        headers = {"Content-Type": "application/json"}
+        headers.update(get_auth_headers())
+        
+        response = requests.post(
+            f"{API_URL}/api/v1/search/verify", 
+            json={"claim": claim}, 
+            headers=headers,
+            timeout=10
+        )
+        if response.status_code == 200:
+            return response.json()
+    except Exception as e:
+        st.error(f"Error searching claim: {e}")
+    return None
+
+def get_user_progress() -> Optional[Dict]:
+    """Get user's progress data"""
+    try:
+        headers = get_auth_headers()
+        if not headers:
+            return None
+            
+        response = requests.get(
+            f"{API_URL}/api/v1/progress/", 
+            headers=headers,
+            timeout=5
+        )
+        if response.status_code == 200:
+            return response.json()
+    except Exception as e:
+        st.error(f"Error fetching progress: {e}")
+    return None
+
+def generate_quiz(claim: str) -> Optional[Dict]:
+    """Generate a quiz from a health claim"""
+    try:
+        headers = {"Content-Type": "application/json"}
+        headers.update(get_auth_headers())
+        
+        response = requests.post(
+            f"{API_URL}/api/v1/quiz/generate",
+            json={"claim": claim},
+            headers=headers,
+            timeout=15
+        )
+        if response.status_code == 200:
+            return response.json()
+    except Exception as e:
+        st.error(f"Error generating quiz: {e}")
+    return None
+
+def submit_quiz_answers(quiz_id: str, answers: List[str]) -> Optional[Dict]:
+    """Submit quiz answers for grading"""
+    try:
+        headers = {"Content-Type": "application/json"}
+        headers.update(get_auth_headers())
+        
+        response = requests.post(
+            f"{API_URL}/api/v1/quiz/submit",
+            json={"quiz_id": quiz_id, "answers": answers},
+            headers=headers,
+            timeout=10
+        )
+        if response.status_code == 200:
+            return response.json()
+    except Exception as e:
+        st.error(f"Error submitting quiz: {e}")
+    return None

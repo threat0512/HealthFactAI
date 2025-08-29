@@ -2,9 +2,26 @@ import streamlit as st
 from components.search import render_search
 from components.cards import render_fact_card
 from components.sidebar import render_sidebar
-from utils.api import fetch_featured_fact
+from utils.api import fetch_featured_fact, get_user_progress
 from utils.state import is_authenticated, set_page
-from streamlit_helpers.user_integration import save_fact_for_user, show_recent_facts
+
+def save_fact_for_user(**kwargs):
+    """Placeholder function - progress is tracked automatically via API"""
+    pass
+
+def show_recent_facts(limit=8):
+    """Show recent facts using progress API"""
+    progress = get_user_progress()
+    if progress and progress.get("total_facts", 0) > 0:
+        st.markdown("### 📚 Your Recent Facts")
+        st.metric("Total Facts Learned", progress["total_facts"])
+        st.metric("Current Streak", progress["current_streak"])
+        if progress.get("categories"):
+            st.write("**Categories:**")
+            for category, count in progress["categories"].items():
+                st.write(f"- {category}: {count} facts")
+    else:
+        st.info("Start searching for health facts to see your progress here!")
 
 def render_dashboard() -> None:
     """Render the main dashboard/home page"""

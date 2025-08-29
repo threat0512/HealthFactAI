@@ -47,7 +47,7 @@ def render_header() -> None:
     )
     
     # Navigation buttons in a single row
-    nav_cols = st.columns(5, gap="small")
+    nav_cols = st.columns(4, gap="small")
     
     # Home button
     with nav_cols[0]:
@@ -79,13 +79,7 @@ def render_header() -> None:
         if st.button("Progress", key="nav-progress", use_container_width=True, help="View your progress"):
             set_page("Progress")
     
-    # Admin button
-    with nav_cols[4]:
-        if st.button("Admin", key="nav-admin", use_container_width=True, help="Admin panel"):
-            if is_authenticated():
-                set_page("Admin")
-            else:
-                set_page("Auth")
+
     
     # Handle button clicks
     if is_authenticated():

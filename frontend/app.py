@@ -12,7 +12,7 @@ from pages.dashboard import render_dashboard
 from pages.categories import render_categories
 from pages.quiz import render_quiz
 from pages.progress import render_progress
-from pages.admin import render_admin
+
 
 # Page configuration
 st.set_page_config(
@@ -28,7 +28,8 @@ initialize_theme()
 # Apply CSS with current theme colors
 from styles.theme import get_theme_colors
 colors = get_theme_colors()
-st.markdown(generate_dynamic_css(colors), unsafe_allow_html=True)
+css = generate_dynamic_css(colors)
+st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
 # Render header
 render_header()
@@ -48,8 +49,7 @@ elif current_page == "Quiz":
     render_quiz()
 elif current_page == "Progress":
     render_progress()
-elif current_page == "Admin":
-    render_admin()
+
 else:
     # Default to landing page
     render_landing()
