@@ -28,7 +28,7 @@ MarkupSafe==3.0.2
 mdurl==0.1.2
 murmurhash==1.0.13
 numpy==2.3.2
-packaging==25.0
+packaging>=20.0,<25.0
 passlib==1.7.4
 preshed==3.0.10
 pyasn1==0.6.1
@@ -41,7 +41,7 @@ python-jose==3.5.0
 python-multipart==0.0.20
 PyYAML==6.0.2
 requests==2.32.5
-rich==14.1.0
+rich>=10.14.0,<14.0
 rsa==4.9.1
 shellingham==1.5.4
 six==1.17.0
