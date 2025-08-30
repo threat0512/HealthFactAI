@@ -25,7 +25,7 @@ Users can check claims, play quizzes, and learn simple tips for spotting false h
 - User login + progress tracking  
 - Dashboard with charts (progress over time)  
 - Admin panel to add/update misinformation claims  
-- Multilingual support (English/Hindi)  
+- Multilingual support
 - AI-powered classification (Hugging Face Transformers)
 
 ---
