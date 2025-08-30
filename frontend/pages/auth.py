@@ -69,7 +69,6 @@ def render_auth() -> None:
         # Center the sign up button
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            if st.button("Sign Up", key="signup-btn", use_container_width=True):
-                st.info("🚧 Sign up functionality coming soon! We're working on it.")
-                # TODO: Implement sign up page/form
-                # set_page("SignUp")  # Uncomment when sign up page is ready
+                if st.button("Sign Up", key="signup-btn", use_container_width=True):
+                    set_page("SignUp")
+                    st.experimental_rerun()
