@@ -59,26 +59,7 @@ def render_sidebar() -> None:
         """,
         unsafe_allow_html=True,
     )
-
-    # Daily Quiz card
-    st.markdown(
-        f"""
-        <div class="right-card">
-          <div style="font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:8px; color:{colors['text']};">
-            <span>📌</span>
-            <span>Daily Quiz Challenge</span>
-          </div>
-          <div style="color:{colors['text_secondary']}; margin-bottom:16px; font-size:14px;">
-            Test your knowledge with today's health quiz!
-          </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    
-    start = st.button("Start Quiz", key="daily_quiz_btn", help="Begin today's quiz challenge")
     
     st.markdown("</div>", unsafe_allow_html=True)
     
-    if start:
-        st.session_state["start_quiz"] = True
-        set_page("Quiz")
+  

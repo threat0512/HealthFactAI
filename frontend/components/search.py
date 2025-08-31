@@ -1,6 +1,6 @@
 import streamlit as st
 from config import CATEGORIES
-from utils.state import get_active_category, set_active_category, is_authenticated
+from utils.state import get_active_category, set_active_category, is_authenticated, set_page
 from utils.api import search_health_claims
 
 def render_search() -> tuple[str, list]:
