@@ -2,7 +2,7 @@
 Fact Card model for storing search results.
 """
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from dataclasses import dataclass
 import json
 
@@ -72,7 +72,7 @@ class FactCard:
             confidence=search_result.get("confidence", ""),
             sources=json.dumps(search_result.get("sources", []), separators=(",", ":")),
             search_query=search_query,
-            created_at=datetime.now()
+            created_at=datetime.now(timezone.utc)
         )
     
     @classmethod

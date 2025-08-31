@@ -2,7 +2,7 @@
 User model and database operations.
 """
 from typing import Optional, List, Dict, Any
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 import json
 from dataclasses import dataclass
 
@@ -42,7 +42,7 @@ class User:
             "content": content,
             "category": category,
             "source_url": source_url,
-            "learned_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "learned_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "type": fact_type,
             **extra_data
         }

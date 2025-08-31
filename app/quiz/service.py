@@ -96,7 +96,6 @@ def generate_mcqs_llm_with_error(contexts: List[Dict[str, str]], claim: str, n: 
             f"CLAIM:\n\"{claim}\"\n\nCONTEXT:\n" + _format_context_blocks(contexts) +
             f"\n\nGenerate {n} items. Difficulty: {difficulty}. Style: {style}. JSON only."
         )
-        print("user_prompt", user_prompt)
         chat = client.chat.completions.create(
             model="gpt-4o-mini",
             temperature=0.2,
@@ -106,9 +105,7 @@ def generate_mcqs_llm_with_error(contexts: List[Dict[str, str]], claim: str, n: 
             ],
             response_format={"type": "json_object"},
         )
-        print("chat", chat)
         raw = chat.choices[0].message.content
-        print("raw", raw)
         data = json.loads(raw or "{}")
         items = data.get("items") or []
         return items, None
@@ -185,8 +182,23 @@ def generate_mcqs_cloze(contexts: List[Dict[str, str]], n: int) -> List[Dict]:
 
 
 def validate_mcqs(items: List[Dict], contexts: List[Dict[str, str]]) -> List[Dict]:
+    from urllib.parse import urlparse
+    
     allowed_urls = {c["url"] for c in contexts if is_allowed(c["url"])}
     valid: List[Dict] = []
+    
+    # Create a more flexible URL matching function
+    def normalize_url(url: str) -> str:
+        """Normalize URL for comparison by removing query params and trailing slashes"""
+        try:
+            parsed = urlparse(url)
+            return f"{parsed.scheme}://{parsed.netloc}{parsed.path}".rstrip('/')
+        except:
+            return url.rstrip('/')
+    
+    # Create normalized allowed URLs
+    normalized_allowed = {normalize_url(url): url for url in allowed_urls}
+    
     for it in items:
         raw_opts = it.get("options")
         if not isinstance(raw_opts, list):
@@ -212,19 +224,45 @@ def validate_mcqs(items: List[Dict], contexts: List[Dict[str, str]]) -> List[Dic
                 if ca_u in letter_map:
                     correct_index = letter_map[ca_u]
                 else:
+                    # Try to match the correct answer text to normalized options
                     try:
-                        correct_index = norm_opts.index(ca.strip())
+                        # First try exact match with normalized answer
+                        ca_norm = ca.strip()
+                        ca_norm = re.sub(r"^[A-Da-d][\)\.:]\s*", "", ca_norm)
+                        ca_norm = re.sub(r"^\d+[\)\.:]\s*", "", ca_norm)
+                        correct_index = norm_opts.index(ca_norm)
                     except Exception:
-                        correct_index = None
+                        # If that fails, try to find the original answer in raw options
+                        try:
+                            raw_opts_clean = [str(o).strip() for o in raw_opts]
+                            correct_index = raw_opts_clean.index(ca.strip())
+                        except Exception:
+                            correct_index = None
         if correct_index not in [0, 1, 2, 3]:
             continue
         # ensure options unique (case-insensitive)
         lower = [o.strip().lower() for o in norm_opts]
         if len(set(lower)) != 4:
             continue
+        
+        # More flexible URL validation
         su = it.get("source_url")
-        if su not in allowed_urls:
+        if not su:
             continue
+            
+        # Check if source URL matches any allowed URL (exact or normalized)
+        url_valid = False
+        if su in allowed_urls:
+            url_valid = True
+        else:
+            # Try normalized comparison
+            normalized_su = normalize_url(su)
+            if normalized_su in normalized_allowed:
+                url_valid = True
+        
+        if not url_valid:
+            continue
+            
         valid.append({
             "question": (it.get("question") or "").strip(),
             "options": norm_opts,

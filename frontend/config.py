@@ -5,7 +5,25 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # API Configuration
-API_URL = os.getenv("BACKEND_API_URL", "http://127.0.0.1:8000/api/v1")
+import streamlit as st
+
+# Try to get from Streamlit secrets first, then environment
+def get_backend_url():
+    # Try Streamlit secrets first
+    try:
+        return st.secrets["BACKEND_API_URL"]
+    except:
+        pass
+    
+    # Try environment variable
+    env_url = os.getenv("BACKEND_API_URL")
+    if env_url:
+        return env_url
+    
+    # Default to production URL
+    return "https://healthfactai-1.onrender.com/api/v1"
+
+API_URL = get_backend_url()
 
 # Page Configuration
 PAGE_TITLE = "HealthFact AI"

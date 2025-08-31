@@ -254,7 +254,7 @@ def generate_quiz(claim: str) -> Optional[Dict]:
             f"{API_URL}/quiz/generate",
             json={"claim": claim},
             headers=headers,
-            timeout=15
+            timeout=60  # Increased timeout for quiz generation
         )
         if response.status_code == 200:
             return response.json()
