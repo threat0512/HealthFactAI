@@ -12,7 +12,7 @@ def render_header() -> None:
     with col1:
         # Logo using Streamlit's image function
         try:
-            st.image("frontend/logo.jpg", width=40)
+            st.image("logo.jpg", width=40)
         except:
             # Fallback to emoji if logo not found
             st.markdown(

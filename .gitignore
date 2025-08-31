@@ -39,6 +39,11 @@ uvicorn.log
 # Databases (you already had this)
 *.db
 
+# Environment and secrets (for production security)
+.env
+frontend/.env
+.streamlit/secrets.toml
+
 # Environment files
 .env
 .env.*
