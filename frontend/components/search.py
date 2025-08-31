@@ -1,7 +1,7 @@
 import streamlit as st
 from config import CATEGORIES
 from utils.state import get_active_category, set_active_category, is_authenticated, set_page
-from utils.api import search_health_claims, track_search_activity
+from utils.api import search_health_claims, track_search_activity, save_fact_card
 
 def render_search() -> tuple[str, list]:
     """Render the search input, category filter chips, and handle search functionality"""
@@ -38,19 +38,19 @@ def render_search() -> tuple[str, list]:
     
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Category chips with better styling
-    st.markdown("<div style='margin: 20px 0;'>", unsafe_allow_html=True)
-    chip_cols = st.columns(len(CATEGORIES), gap="small")
+    # # Category chips with better styling
+    # st.markdown("<div style='margin: 20px 0;'>", unsafe_allow_html=True)
+    # chip_cols = st.columns(len(CATEGORIES), gap="small")
     
-    for idx, name in enumerate(CATEGORIES):
-        with chip_cols[idx]:
-            is_active = get_active_category() == name
-            if st.button(
-                name, 
-                key=f"chip-{name}", 
-                help=f"Filter by {name} category"
-            ):
-                set_active_category(name)
+    # for idx, name in enumerate(CATEGORIES):
+    #     with chip_cols[idx]:
+    #         is_active = get_active_category() == name
+    #         if st.button(
+    #             name, 
+    #             key=f"chip-{name}", 
+    #             help=f"Filter by {name} category"
+    #         ):
+    #             set_active_category(name)
     
     st.markdown("</div>", unsafe_allow_html=True)
     
@@ -71,8 +71,12 @@ def render_search() -> tuple[str, list]:
             search_results = results
             st.success(f"✅ Found {len(results)} result(s) for '{query}'")
             
-            # Track search activity in background
+            # Track search activity and save fact cards in background
             track_search_activity(query.strip())
+            
+            # Save each search result as a fact card
+            for result in results:
+                save_fact_card(query.strip(), result)
         else:
             st.info(f"🔍 No results found for '{query}'. Try rephrasing your question.")
     

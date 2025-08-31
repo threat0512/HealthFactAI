@@ -3,7 +3,7 @@ API v1 router initialization.
 """
 from fastapi import APIRouter
 
-from app.api.v1 import auth, progress, search, quiz
+from app.api.v1 import auth, progress, search, quiz, fact_cards
 
 # Create main API router
 api_router = APIRouter()
@@ -13,6 +13,7 @@ api_router.include_router(auth.router)
 api_router.include_router(progress.router)
 api_router.include_router(search.router)
 api_router.include_router(quiz.router)
+api_router.include_router(fact_cards.router)
 
 # Health check endpoint
 @api_router.get("/health", tags=["Health"])

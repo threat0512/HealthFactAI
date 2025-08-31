@@ -6,10 +6,12 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
 from app.repositories.user_repository import UserRepository
+from app.repositories.fact_card_repository import FactCardRepository
 from app.services.auth_service import AuthService
 from app.services.progress_service import ProgressService
 from app.services.search_service import SearchService
 from app.services.quiz_service import QuizService
+from app.services.fact_card_service import FactCardService
 from app.models.user import User
 
 # OAuth2 scheme
@@ -17,10 +19,12 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 # Repository instances (singleton pattern)
 _user_repository = None
+_fact_card_repository = None
 _auth_service = None
 _progress_service = None
 _search_service = None
 _quiz_service = None
+_fact_card_service = None
 
 def get_user_repository() -> UserRepository:
     """Get user repository instance."""
@@ -82,3 +86,19 @@ def get_current_user(
 def get_current_user_id(current_user: User = Depends(get_current_user)) -> int:
     """Get current user ID."""
     return current_user.id
+
+def get_fact_card_repository() -> FactCardRepository:
+    """Get fact card repository instance."""
+    global _fact_card_repository
+    if _fact_card_repository is None:
+        _fact_card_repository = FactCardRepository()
+    return _fact_card_repository
+
+def get_fact_card_service(
+    fact_card_repository: FactCardRepository = Depends(get_fact_card_repository)
+) -> FactCardService:
+    """Get fact card service instance."""
+    global _fact_card_service
+    if _fact_card_service is None:
+        _fact_card_service = FactCardService(fact_card_repository)
+    return _fact_card_service

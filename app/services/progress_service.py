@@ -27,12 +27,21 @@ class ProgressService:
         # Calculate facts this week
         facts_this_week = self._count_facts_this_week(user.facts_as_list)
         
+        # Convert last_activity_date to string if it's a datetime object
+        last_activity = user.last_activity_date
+        if hasattr(last_activity, 'strftime'):
+            # It's a datetime object, convert to string
+            last_activity = last_activity.strftime("%Y-%m-%d")
+        elif hasattr(last_activity, 'date'):
+            # It's a datetime object, get date part and convert to string
+            last_activity = last_activity.date().strftime("%Y-%m-%d")
+            
         return {
             "total_facts": user.total_facts_count,
             "current_streak": user.current_streak,
             "longest_streak": user.longest_streak,
             "categories": categories,
-            "last_activity": user.last_activity_date,
+            "last_activity": last_activity,
             "facts_this_week": facts_this_week
         }
     
@@ -114,8 +123,13 @@ class ProgressService:
         last_activity = None
         if user.last_activity_date:
             try:
-                last_activity = datetime.strptime(user.last_activity_date, "%Y-%m-%d").date()
-            except ValueError:
+                # Handle both string and datetime objects
+                if isinstance(user.last_activity_date, str):
+                    last_activity = datetime.strptime(user.last_activity_date, "%Y-%m-%d").date()
+                else:
+                    # It's already a datetime object
+                    last_activity = user.last_activity_date.date()
+            except (ValueError, AttributeError):
                 pass
         
         if last_activity is None:

@@ -13,12 +13,12 @@ def fetch_featured_fact(query: str = "") -> Dict:
     except Exception:
         pass
     
-    # Fallback message if API is unavailable
+    # Simple fallback when no search is active
     return {
         "category": "General",
         "confidence": "100%",
-        "title": "Ready to Learn",
-        "summary": "Start searching to know more about health and wellness topics.",
+        "title": "Welcome to HealthFact AI",
+        "summary": "Use the search bar above to discover evidence-based health information.",
         "sources": [],
     }
 
@@ -279,3 +279,110 @@ def submit_quiz_answers(quiz_id: str, answers: List[str]) -> Optional[Dict]:
     except Exception as e:
         st.error(f"Error submitting quiz: {e}")
     return None
+
+def save_fact_card(search_query: str, search_result: Dict) -> bool:
+    """Save a search result as a fact card"""
+    try:
+        headers = {"Content-Type": "application/json"}
+        headers.update(get_auth_headers())
+        
+        if not headers.get("Authorization"):
+            return False
+        
+        response = requests.post(
+            f"{API_URL}/fact-cards/save",
+            json={"search_query": search_query, "search_result": search_result},
+            headers=headers,
+            timeout=5
+        )
+        return response.status_code == 200
+    except Exception:
+        # Silently fail - fact card saving shouldn't break main functionality
+        return False
+
+def get_user_fact_cards(category: str = "All", limit: int = 20, offset: int = 0) -> Optional[Dict]:
+    """Get user's saved fact cards"""
+    try:
+        headers = get_auth_headers()
+        if not headers:
+            return None
+        
+        params = {"category": category, "limit": limit, "offset": offset}
+        response = requests.get(
+            f"{API_URL}/fact-cards/",
+            headers=headers,
+            params=params,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            return response.json()
+        elif response.status_code == 401:
+            st.error("🔐 Authentication required. Please log in to view fact cards.")
+            return None
+    except Exception as e:
+        st.error(f"❌ Error fetching fact cards: {e}")
+        return None
+    return None
+
+def get_fact_card_categories() -> List[str]:
+    """Get all categories that have fact cards for the user"""
+    try:
+        headers = get_auth_headers()
+        if not headers:
+            return ["All"]
+        
+        response = requests.get(
+            f"{API_URL}/fact-cards/categories",
+            headers=headers,
+            timeout=5
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("categories", ["All"])
+    except Exception:
+        pass
+    return ["All"]
+
+def search_fact_cards(query: str, category: Optional[str] = None, limit: int = 20) -> Optional[List[Dict]]:
+    """Search user's fact cards"""
+    try:
+        headers = get_auth_headers()
+        if not headers:
+            return None
+        
+        params = {"q": query, "limit": limit}
+        if category:
+            params["category"] = category
+        
+        response = requests.get(
+            f"{API_URL}/fact-cards/search",
+            headers=headers,
+            params=params,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("fact_cards", [])
+    except Exception as e:
+        st.error(f"❌ Error searching fact cards: {e}")
+        return None
+    return None
+
+def delete_fact_card(fact_card_id: int) -> bool:
+    """Delete a fact card"""
+    try:
+        headers = get_auth_headers()
+        if not headers:
+            return False
+        
+        response = requests.delete(
+            f"{API_URL}/fact-cards/{fact_card_id}",
+            headers=headers,
+            timeout=5
+        )
+        return response.status_code == 200
+    except Exception:
+        return False

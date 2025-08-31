@@ -10,9 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1 import api_router
 
-# Initialize database
-from database import init_db
-init_db()
+# Database is initialized through app/core/database.py
 
 def create_application() -> FastAPI:
     """Create and configure the FastAPI application."""

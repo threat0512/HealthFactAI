@@ -1,10 +1,10 @@
 """
 Base repository pattern for database operations.
+Supports both PostgreSQL and SQLite through the database manager.
 """
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar, Optional, List, Any
-import sqlite3
-from app.core.config import settings
+from app.core.database import db_manager
 
 T = TypeVar('T')
 
@@ -12,13 +12,7 @@ class BaseRepository(ABC, Generic[T]):
     """Base repository with common database operations."""
     
     def __init__(self):
-        self.db_name = settings.DB_NAME
-    
-    def get_connection(self) -> sqlite3.Connection:
-        """Get database connection."""
-        conn = sqlite3.connect(self.db_name, check_same_thread=False)
-        conn.row_factory = sqlite3.Row  # Enable dict-like access
-        return conn
+        self.db = db_manager
     
     @abstractmethod
     def create(self, entity: T) -> T:
@@ -40,25 +34,14 @@ class BaseRepository(ABC, Generic[T]):
         """Delete an entity."""
         pass
     
-    def execute_query(self, query: str, params: tuple = ()) -> List[sqlite3.Row]:
+    def execute_query(self, query: str, params: tuple = ()) -> List[Any]:
         """Execute a SELECT query and return results."""
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(query, params)
-            return cursor.fetchall()
+        return self.db.execute_query(query, params)
     
     def execute_command(self, command: str, params: tuple = ()) -> int:
         """Execute an INSERT/UPDATE/DELETE command and return affected rows."""
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(command, params)
-            conn.commit()
-            return cursor.rowcount
+        return self.db.execute_command(command, params)
     
     def execute_command_get_id(self, command: str, params: tuple = ()) -> int:
         """Execute command and return the last inserted row ID."""
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(command, params)
-            conn.commit()
-            return cursor.lastrowid
+        return self.db.execute_command_get_id(command, params)

@@ -42,7 +42,7 @@ class User:
             "content": content,
             "category": category,
             "source_url": source_url,
-            "learned_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "learned_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
             "type": fact_type,
             **extra_data
         }
@@ -96,13 +96,13 @@ class User:
         
         # Assuming standard user table structure
         return cls(
-            id=row[0] if len(row) > 0 else None,
-            username=row[1] if len(row) > 1 else "",
-            password=row[2] if len(row) > 2 else "",
-            email=row[3] if len(row) > 3 else None,
-            facts_learned=row[4] if len(row) > 4 else "[]",
-            current_streak=row[5] if len(row) > 5 else 0,
-            longest_streak=row[6] if len(row) > 6 else 0,
-            total_facts_count=row[7] if len(row) > 7 else 0,
+            id=int(row[0]) if len(row) > 0 and row[0] is not None else None,
+            username=str(row[1]) if len(row) > 1 and row[1] is not None else "",
+            password=str(row[2]) if len(row) > 2 and row[2] is not None else "",
+            email=str(row[3]) if len(row) > 3 and row[3] is not None else None,
+            facts_learned=str(row[4]) if len(row) > 4 and row[4] is not None else "[]",
+            current_streak=int(row[5]) if len(row) > 5 and row[5] is not None else 0,
+            longest_streak=int(row[6]) if len(row) > 6 and row[6] is not None else 0,
+            total_facts_count=int(row[7]) if len(row) > 7 and row[7] is not None else 0,
             last_activity_date=row[8] if len(row) > 8 else None
         )

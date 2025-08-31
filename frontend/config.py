@@ -1,7 +1,11 @@
 # Frontend configuration constants
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # API Configuration
-API_URL = "http://127.0.0.1:8000/api/v1"
+API_URL = os.getenv("BACKEND_API_URL", "http://127.0.0.1:8000/api/v1")
 
 # Page Configuration
 PAGE_TITLE = "HealthFact AI"

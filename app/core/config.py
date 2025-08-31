@@ -25,9 +25,14 @@ class Settings(BaseModel):
     PORT: int = 8000
     DEBUG: bool = False
     
-    # Database Settings
-    DATABASE_URL: str = "sqlite:///./healthfact.db"
-    DB_NAME: str = "healthfact.db"
+    # Database Settings - Supabase PostgreSQL for testing
+    DATABASE_URL: str = Field(default=os.getenv("DATABASE_URL"))
+    DB_TYPE: str = "postgresql"
+  
+
+    @property
+    def is_postgresql(self) -> bool:
+        return True
     
     # External API Keys
     bing_api_key: Optional[str] = Field(default=os.getenv("BING_API_KEY"))
