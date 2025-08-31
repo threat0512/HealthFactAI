@@ -1,6 +1,16 @@
 import streamlit as st
+import os
 from styles.theme import get_theme_colors
 from utils.state import clear_user, is_authenticated, get_current_page, set_page
+
+def get_logo_path():
+    """Get the correct logo path for current environment"""
+    if os.path.exists("logo.jpg"):
+        return "logo.jpg"
+    elif os.path.exists("frontend/logo.jpg"):
+        return "frontend/logo.jpg"
+    else:
+        return None
 
 def render_header() -> None:
     """Render the main navigation header with navigation buttons"""
@@ -11,9 +21,14 @@ def render_header() -> None:
     
     with col1:
         # Logo using Streamlit's image function
-        try:
-            st.image("logo.jpg", width=40)
-        except:
+        logo_path = get_logo_path()
+        if logo_path:
+            try:
+                st.image(logo_path, width=40)
+            except:
+                logo_path = None
+        
+        if not logo_path:
             # Fallback to emoji if logo not found
             st.markdown(
                 f"""

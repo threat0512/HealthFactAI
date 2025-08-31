@@ -15,6 +15,7 @@ class FactCardRepository(BaseRepository[FactCard]):
             INSERT INTO fact_cards (user_id, title, summary, category, confidence, 
                                    sources, search_query, created_at, updated_at)
             VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            RETURNING id
         """
         params = (
             fact_card.user_id,

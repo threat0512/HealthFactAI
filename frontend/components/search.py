@@ -1,7 +1,7 @@
 import streamlit as st
 from config import CATEGORIES
 from utils.state import get_active_category, set_active_category, is_authenticated, set_page
-from utils.api import search_health_claims, track_search_activity, save_fact_card
+from utils.api import search_health_claims, track_search_activity
 
 def render_search() -> tuple[str, list]:
     """Render the search input, category filter chips, and handle search functionality"""
@@ -71,12 +71,8 @@ def render_search() -> tuple[str, list]:
             search_results = results
             st.success(f"✅ Found {len(results)} result(s) for '{query}'")
             
-            # Track search activity and save fact cards in background
+            # Track search activity
             track_search_activity(query.strip())
-            
-            # Save each search result as a fact card
-            for result in results:
-                save_fact_card(query.strip(), result)
         else:
             st.info(f"🔍 No results found for '{query}'. Try rephrasing your question.")
     

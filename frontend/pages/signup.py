@@ -51,7 +51,12 @@ def render_signup() -> None:
                                     "username": username,
                                     "password": password
                                 }
-                                login_resp = requests.post(f"{API_URL}/auth/login", data=login_data, timeout=8)
+                                login_resp = requests.post(
+                                    f"{API_URL}/auth/login", 
+                                    data=login_data, 
+                                    headers={"Content-Type": "application/x-www-form-urlencoded"},
+                                    timeout=8
+                                )
                                 
                                 if login_resp.status_code == 200:
                                     login_data = login_resp.json()

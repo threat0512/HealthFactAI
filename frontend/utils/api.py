@@ -91,7 +91,7 @@ def search_health_claims(query: str) -> Optional[List[Dict]]:
             
             # Convert to fact card format
             fact_card = {
-                "title": f"Search: {query}",
+                "title": data.get("claim", query),  # Use the original claim or query as title
                 "summary": data.get("explanation", "No explanation available"),
                 "category": "Health Research",
                 "confidence": f"{int(data.get('confidence', 0) * 100)}%",
@@ -312,7 +312,7 @@ def get_user_fact_cards(category: str = "All", limit: int = 20, offset: int = 0)
             f"{API_URL}/fact-cards/",
             headers=headers,
             params=params,
-            timeout=10
+            timeout=30  # Increased timeout for database operations
         )
         
         if response.status_code == 200:
@@ -335,7 +335,7 @@ def get_fact_card_categories() -> List[str]:
         response = requests.get(
             f"{API_URL}/fact-cards/categories",
             headers=headers,
-            timeout=5
+            timeout=30  # Increased timeout for database operations
         )
         
         if response.status_code == 200:
@@ -360,7 +360,7 @@ def search_fact_cards(query: str, category: Optional[str] = None, limit: int = 2
             f"{API_URL}/fact-cards/search",
             headers=headers,
             params=params,
-            timeout=10
+            timeout=30  # Increased timeout for database operations
         )
         
         if response.status_code == 200:
@@ -381,7 +381,7 @@ def delete_fact_card(fact_card_id: int) -> bool:
         response = requests.delete(
             f"{API_URL}/fact-cards/{fact_card_id}",
             headers=headers,
-            timeout=5
+            timeout=15  # Reasonable timeout for delete operations
         )
         return response.status_code == 200
     except Exception:

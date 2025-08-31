@@ -87,10 +87,10 @@ class FactCard:
                 id=int(row.get('id')) if row.get('id') is not None else None,
                 user_id=int(row.get('user_id', 0)),
                 title=str(row.get('title', '')),
-                summary=str(row.get('content', '')),  # Note: table has 'content', model expects 'summary'
+                summary=str(row.get('summary', '')),
                 category=str(row.get('category', 'General')),
                 confidence=str(row.get('confidence')) if row.get('confidence') is not None else None,
-                sources=str(row.get('source_url', '[]')),  # Note: table has 'source_url', model expects 'sources'
+                sources=json.dumps(row.get('sources', [])) if isinstance(row.get('sources'), (list, dict)) else str(row.get('sources', '[]')),
                 search_query=str(row.get('search_query', '')),
                 created_at=row.get('created_at'),
                 updated_at=row.get('updated_at')

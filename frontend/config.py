@@ -1,8 +1,13 @@
 # Frontend configuration constants
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+# Try to load .env for local development (optional for Streamlit Cloud)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # dotenv not available (e.g., on Streamlit Cloud) - that's fine
+    pass
 
 # API Configuration
 import streamlit as st
@@ -11,23 +16,41 @@ import streamlit as st
 def get_backend_url():
     # Try Streamlit secrets first
     try:
-        return st.secrets["BACKEND_API_URL"]
-    except:
+        url = st.secrets["BACKEND_API_URL"]
+        print(f"[DEBUG] Using Streamlit secrets URL: {url}")
+        return url
+    except Exception as e:
+        print(f"[DEBUG] Streamlit secrets not found: {e}")
         pass
     
     # Try environment variable
     env_url = os.getenv("BACKEND_API_URL")
     if env_url:
+        print(f"[DEBUG] Using environment URL: {env_url}")
         return env_url
     
     # Default to production URL
-    return "https://healthfactai-1.onrender.com/api/v1"
+    default_url = "https://healthfactai-1.onrender.com/api/v1"
+    print(f"[DEBUG] Using default URL: {default_url}")
+    return default_url
 
 API_URL = get_backend_url()
 
 # Page Configuration
 PAGE_TITLE = "HealthFact AI"
-PAGE_ICON = "frontend/logo.jpg"  # Updated to match your file
+# Handle different path structures for local vs cloud deployment
+try:
+    # Try relative path first (for Streamlit Cloud)
+    if os.path.exists("logo.jpg"):
+        PAGE_ICON = "logo.jpg"
+    elif os.path.exists("frontend/logo.jpg"):
+        PAGE_ICON = "frontend/logo.jpg"
+    else:
+        # Fallback to emoji if file not found
+        PAGE_ICON = "🏥"
+except:
+    PAGE_ICON = "🏥"
+    
 LAYOUT = "wide"
 
 # Color Scheme

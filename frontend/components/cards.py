@@ -18,7 +18,7 @@ def render_fact_card(fact: Dict) -> None:
           <div style="font-size:24px; font-weight:800; margin-bottom:12px; color:{colors['text']};">{fact['title']}</div>
           <div style="color:{colors['text_secondary']}; line-height:1.7; font-size:16px;">{fact['summary']}</div>
           <div style="margin-top:20px;">
-            {''.join([f"<a class='source-btn' href='{s['url']}' target='_blank'>{s['name']}</a>" for s in fact['sources']])}
+            {''.join([f"<a class='source-btn' href='{s.get('url', '#')}' target='_blank'>{s.get('name', s.get('title', 'Source'))}</a>" for s in fact.get('sources', [])])}
           </div>
           <div style="display:flex; justify-content:flex-end; color:{colors['text_secondary']}; margin-top:12px; font-size:14px;">
             🔗 Share • 📖 Read More

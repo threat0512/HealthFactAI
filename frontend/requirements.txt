@@ -1,1 +1,3 @@
-## See root requirements.txt for all dependencies
+streamlit
+requests
+plotly

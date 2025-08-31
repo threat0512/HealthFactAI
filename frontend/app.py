@@ -1,7 +1,8 @@
 import streamlit as st
+import os
 
 # Import our modular components
-from config import PAGE_TITLE, PAGE_ICON, LAYOUT
+from config import PAGE_TITLE, PAGE_ICON, LAYOUT, API_URL
 from styles.theme import initialize_theme
 from styles.components import generate_dynamic_css
 from utils.state import initialize_session_state, get_current_page, is_authenticated, is_token_valid, should_refresh_token, clear_user
@@ -15,6 +16,15 @@ from pages.categories import render_categories
 from pages.quiz import render_quiz
 from pages.progress import render_progress
 
+# Debug section - remove after fixing
+if st.sidebar.button("🐛 Debug Info"):
+    st.sidebar.write(f"**API URL**: {API_URL}")
+    st.sidebar.write(f"**Secrets available**: {list(st.secrets.keys()) if hasattr(st, 'secrets') else 'None'}")
+    st.sidebar.write(f"**Environment**: {st.secrets.get('BACKEND_API_URL', 'Not in secrets') if hasattr(st, 'secrets') else 'No secrets'}")
+    st.sidebar.write(f"**Logo exists**: {os.path.exists('logo.jpg')}")
+    st.sidebar.write(f"**Frontend/Logo exists**: {os.path.exists('frontend/logo.jpg')}")
+    st.sidebar.write(f"**Current working dir**: {os.getcwd()}")
+    st.sidebar.write(f"**Files in current dir**: {os.listdir('.')[:10]}")  # First 10 files
 
 # Page configuration
 st.set_page_config(

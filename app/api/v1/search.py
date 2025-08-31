@@ -5,8 +5,9 @@ from typing import List
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from app.core.dependencies import get_current_user_id, get_search_service
+from app.core.dependencies import get_current_user_id, get_search_service, get_fact_card_service
 from app.services.search_service import SearchService
+from app.services.fact_card_service import FactCardService
 
 router = APIRouter(prefix="/search", tags=["Search"])
 
@@ -50,10 +51,34 @@ class SearchResponse(BaseModel):
 def search_verified_claim(
     request: SearchRequest,
     user_id: int = Depends(get_current_user_id),
-    search_service: SearchService = Depends(get_search_service)
+    search_service: SearchService = Depends(get_search_service),
+    fact_card_service: FactCardService = Depends(get_fact_card_service)
 ):
     """Search and verify a health claim."""
     result = search_service.search_verified_claim(request.claim, user_id)
+    
+    # Automatically save the search result as a fact card
+    try:
+        # Convert search result to fact card format
+        search_result_for_card = {
+            "title": result["claim"],
+            "summary": result["explanation"],
+            "category": "Health Research",  # Will be classified by the service
+            "confidence": f"{int(result['confidence'] * 100)}%",
+            "sources": [
+                {
+                    "name": source.get("title", "Source"),
+                    "url": source.get("url", "#")
+                } for source in result["sources"]
+            ]
+        }
+        
+        # Save as fact card
+        fact_card_service.save_search_result(user_id, request.claim, search_result_for_card)
+    except Exception as e:
+        # Don't fail the search if fact card saving fails
+        print(f"Warning: Failed to save fact card: {e}")
+    
     return SearchResponse(**result)
 
 @router.get("/history")

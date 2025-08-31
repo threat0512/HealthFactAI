@@ -63,6 +63,7 @@ def render_auth() -> None:
                         response = requests.post(
                             f"{API_URL}/auth/login",
                             data=form_data,
+                            headers={"Content-Type": "application/x-www-form-urlencoded"},
                             timeout=10
                         )
                         

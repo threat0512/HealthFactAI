@@ -98,10 +98,20 @@ class DatabaseManager:
             if settings.is_postgresql:
                 # PostgreSQL: get the last inserted ID using RETURNING clause or sequence
                 if "RETURNING" in command.upper():
-                    return cursor.fetchone()[0]
+                    result = cursor.fetchone()
+                    if isinstance(result, dict):
+                        # psycopg3 with dict_row returns a dict
+                        return list(result.values())[0]
+                    else:
+                        # tuple result
+                        return result[0]
                 else:
                     cursor.execute("SELECT lastval()")
-                    return cursor.fetchone()[0]
+                    result = cursor.fetchone()
+                    if isinstance(result, dict):
+                        return list(result.values())[0]
+                    else:
+                        return result[0]
             else:
                 # SQLite: get the last inserted ID
                 return cursor.lastrowid
