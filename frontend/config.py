@@ -9,7 +9,7 @@ API_URL = os.getenv("BACKEND_API_URL", "http://127.0.0.1:8000/api/v1")
 
 # Page Configuration
 PAGE_TITLE = "HealthFact AI"
-PAGE_ICON = "🧠"
+PAGE_ICON = "frontend/logo.jpg"  # Updated to match your file
 LAYOUT = "wide"
 
 # Color Scheme

@@ -6,19 +6,17 @@ def render_header() -> None:
     """Render the main navigation header with navigation buttons"""
     colors = get_theme_colors()
     
-    # Header with logo, brand, and navigation
-    st.markdown(
-        f"""
-        <div style="
-            background: {colors['card_bg']};
-            border-bottom: 1px solid {colors['border']};
-            padding: 16px 24px;
-            margin: -48px -24px 24px -24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        ">
-            <div style="display: flex; align-items: center; gap: 16px;">
+    # Create header with columns for better logo placement
+    col1, col2, col3 = st.columns([1, 3, 1])
+    
+    with col1:
+        # Logo using Streamlit's image function
+        try:
+            st.image("frontend/logo.jpg", width=40)
+        except:
+            # Fallback to emoji if logo not found
+            st.markdown(
+                f"""
                 <div style="
                     background: {colors['accent']};
                     color: white;
@@ -31,20 +29,27 @@ def render_header() -> None:
                     font-weight: 800;
                     font-size: 18px;
                 ">
-                    🧠
+                    ��
                 </div>
-                <div style="
-                    font-size: 24px;
-                    font-weight: 800;
-                    color: {colors['text']};
-                ">
-                    HealthFactAI
-                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+    
+    with col2:
+        # Brand name
+        st.markdown(
+            f"""
+            <div style="
+                font-size: 24px;
+                font-weight: 800;
+                color: {colors['text']};
+                text-align: center;
+            ">
+                HealthFactAI
             </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            """,
+            unsafe_allow_html=True,
+        )
     
     # Navigation buttons in a single row
     nav_cols = st.columns(4, gap="small")
@@ -78,8 +83,6 @@ def render_header() -> None:
     with nav_cols[3]:
         if st.button("Progress", key="nav-progress", use_container_width=True, help="View your progress"):
             set_page("Progress")
-    
-
     
     # Handle button clicks
     if is_authenticated():
