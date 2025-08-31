@@ -79,13 +79,16 @@ class FactCardRepository(BaseRepository[FactCard]):
             ORDER BY category
         """
         rows = self.execute_query(query, (user_id,))
-        return [row[0] for row in rows]
+        return [row['category'] if isinstance(row, dict) else row[0] for row in rows]
     
     def count_by_user(self, user_id: int) -> int:
         """Count total fact cards for a user."""
         query = "SELECT COUNT(*) FROM fact_cards WHERE user_id = %s"
         rows = self.execute_query(query, (user_id,))
-        return rows[0][0] if rows else 0
+        if rows:
+            row = rows[0]
+            return row['count'] if isinstance(row, dict) else row[0]
+        return 0
     
     def count_by_user_and_category(self, user_id: int, category: str) -> int:
         """Count fact cards for a user in a specific category."""
@@ -94,7 +97,10 @@ class FactCardRepository(BaseRepository[FactCard]):
         
         query = "SELECT COUNT(*) FROM fact_cards WHERE user_id = %s AND category = %s"
         rows = self.execute_query(query, (user_id, category))
-        return rows[0][0] if rows else 0
+        if rows:
+            row = rows[0]
+            return row['count'] if isinstance(row, dict) else row[0]
+        return 0
     
     def update(self, fact_card: FactCard) -> FactCard:
         """Update an existing fact card."""

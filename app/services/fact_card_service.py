@@ -29,7 +29,7 @@ class FactCardService:
             return self.fact_card_repository.create(fact_card)
             
         except Exception as e:
-            print(f"Error saving search result: {e}")
+            print(f"Error saving search result: {str(e)}")
             return None
     
     def get_user_fact_cards(self, user_id: int, category: str = "All", 
@@ -96,7 +96,7 @@ class FactCardService:
             }
             
         except Exception as e:
-            print(f"Error getting fact card stats: {e}")
+            print(f"Error getting fact card stats: {str(e)}")
             return {
                 "total_fact_cards": 0,
                 "categories": ["All"],

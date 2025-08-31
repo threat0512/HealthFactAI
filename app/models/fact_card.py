@@ -76,20 +76,36 @@ class FactCard:
         )
     
     @classmethod
-    def from_db_row(cls, row: tuple) -> "FactCard":
-        """Create FactCard from database row."""
+    def from_db_row(cls, row) -> "FactCard":
+        """Create FactCard from database row (works with both tuple and dict rows)."""
         if not row:
             return None
         
-        return cls(
-            id=int(row[0]) if len(row) > 0 and row[0] is not None else None,
-            user_id=int(row[1]) if len(row) > 1 and row[1] is not None else 0,
-            title=str(row[2]) if len(row) > 2 and row[2] is not None else "",
-            summary=str(row[3]) if len(row) > 3 and row[3] is not None else "",
-            category=str(row[4]) if len(row) > 4 and row[4] is not None else "General",
-            confidence=str(row[5]) if len(row) > 5 and row[5] is not None else None,
-            sources=str(row[6]) if len(row) > 6 and row[6] is not None else "[]",
-            search_query=str(row[7]) if len(row) > 7 and row[7] is not None else "",
-            created_at=datetime.fromisoformat(str(row[8]).replace('Z', '+00:00')) if len(row) > 8 and row[8] else None,
-            updated_at=datetime.fromisoformat(str(row[9]).replace('Z', '+00:00')) if len(row) > 9 and row[9] else None
-        )
+        # Handle both dictionary rows (psycopg3 with dict_row) and tuple rows
+        if isinstance(row, dict):
+            return cls(
+                id=int(row.get('id')) if row.get('id') is not None else None,
+                user_id=int(row.get('user_id', 0)),
+                title=str(row.get('title', '')),
+                summary=str(row.get('content', '')),  # Note: table has 'content', model expects 'summary'
+                category=str(row.get('category', 'General')),
+                confidence=str(row.get('confidence')) if row.get('confidence') is not None else None,
+                sources=str(row.get('source_url', '[]')),  # Note: table has 'source_url', model expects 'sources'
+                search_query=str(row.get('search_query', '')),
+                created_at=row.get('created_at'),
+                updated_at=row.get('updated_at')
+            )
+        else:
+            # Legacy tuple support
+            return cls(
+                id=int(row[0]) if len(row) > 0 and row[0] is not None else None,
+                user_id=int(row[1]) if len(row) > 1 and row[1] is not None else 0,
+                title=str(row[2]) if len(row) > 2 and row[2] is not None else "",
+                summary=str(row[3]) if len(row) > 3 and row[3] is not None else "",
+                category=str(row[4]) if len(row) > 4 and row[4] is not None else "General",
+                confidence=str(row[5]) if len(row) > 5 and row[5] is not None else None,
+                sources=str(row[6]) if len(row) > 6 and row[6] is not None else "[]",
+                search_query=str(row[7]) if len(row) > 7 and row[7] is not None else "",
+                created_at=datetime.fromisoformat(str(row[8]).replace('Z', '+00:00')) if len(row) > 8 and row[8] else None,
+                updated_at=datetime.fromisoformat(str(row[9]).replace('Z', '+00:00')) if len(row) > 9 and row[9] else None
+            )

@@ -89,20 +89,34 @@ class User:
         }
     
     @classmethod
-    def from_db_row(cls, row: tuple) -> "User":
-        """Create User from database row."""
+    def from_db_row(cls, row) -> "User":
+        """Create User from database row (works with both tuple and dict rows)."""
         if not row:
             return None
         
-        # Assuming standard user table structure
-        return cls(
-            id=int(row[0]) if len(row) > 0 and row[0] is not None else None,
-            username=str(row[1]) if len(row) > 1 and row[1] is not None else "",
-            password=str(row[2]) if len(row) > 2 and row[2] is not None else "",
-            email=str(row[3]) if len(row) > 3 and row[3] is not None else None,
-            facts_learned=str(row[4]) if len(row) > 4 and row[4] is not None else "[]",
-            current_streak=int(row[5]) if len(row) > 5 and row[5] is not None else 0,
-            longest_streak=int(row[6]) if len(row) > 6 and row[6] is not None else 0,
-            total_facts_count=int(row[7]) if len(row) > 7 and row[7] is not None else 0,
-            last_activity_date=row[8] if len(row) > 8 else None
-        )
+        # Handle both dictionary rows (psycopg3 with dict_row) and tuple rows
+        if isinstance(row, dict):
+            return cls(
+                id=int(row.get('id')) if row.get('id') is not None else None,
+                username=str(row.get('username', '')),
+                password=str(row.get('password', '')),
+                email=str(row.get('email')) if row.get('email') is not None else None,
+                facts_learned=str(row.get('facts_learned', '[]')),
+                current_streak=int(row.get('current_streak', 0)),
+                longest_streak=int(row.get('longest_streak', 0)),
+                total_facts_count=int(row.get('total_facts_count', 0)),
+                last_activity_date=row.get('last_activity_date')
+            )
+        else:
+            # Legacy tuple support
+            return cls(
+                id=int(row[0]) if len(row) > 0 and row[0] is not None else None,
+                username=str(row[1]) if len(row) > 1 and row[1] is not None else "",
+                password=str(row[2]) if len(row) > 2 and row[2] is not None else "",
+                email=str(row[3]) if len(row) > 3 and row[3] is not None else None,
+                facts_learned=str(row[4]) if len(row) > 4 and row[4] is not None else "[]",
+                current_streak=int(row[5]) if len(row) > 5 and row[5] is not None else 0,
+                longest_streak=int(row[6]) if len(row) > 6 and row[6] is not None else 0,
+                total_facts_count=int(row[7]) if len(row) > 7 and row[7] is not None else 0,
+                last_activity_date=row[8] if len(row) > 8 else None
+            )
