@@ -90,21 +90,11 @@ class ProgressService:
         if not user:
             return False
         
-        # Add fact for each answer
-        for i, (user_answer, correct_answer) in enumerate(zip(answers, correct_answers)):
-            is_correct = user_answer == correct_answer
-            user.add_fact(
-                content=f"Quiz Question {i+1}: {'Correct' if is_correct else 'Incorrect'} ({user_answer} vs {correct_answer})",
-                category="Quiz",
-                source_url=None,
-                fact_type="quiz_answer",
-                question_number=i + 1,
-                user_answer=user_answer,
-                correct_answer=correct_answer,
-                is_correct=is_correct
-            )
+        # Add fact for each answer - but don't create individual facts per answer
+        # Instead, just update the streak without adding quiz answer facts
+        # This prevents "Quiz" category from appearing in charts
         
-        # Update streak (only once per quiz session)
+        # Only update streak (once per quiz session)
         self._update_streak(user)
         
         # Save to database

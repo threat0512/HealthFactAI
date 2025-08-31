@@ -141,9 +141,108 @@ def get_user_progress() -> Optional[Dict]:
         )
         if response.status_code == 200:
             return response.json()
+        elif response.status_code == 401:
+            st.error("🔐 Authentication required. Please log in to view progress.")
+            return None
+        elif response.status_code == 404:
+            # User has no progress yet, return empty data
+            return {
+                "total_facts": 0,
+                "current_streak": 0,
+                "longest_streak": 0,
+                "categories": {},
+                "last_activity": None,
+                "facts_this_week": 0
+            }
+    except requests.exceptions.ConnectionError:
+        st.error("🔌 Cannot connect to backend. Please check if the server is running.")
+        return None
     except Exception as e:
-        st.error(f"Error fetching progress: {e}")
+        st.error(f"❌ Error fetching progress: {e}")
+        return None
     return None
+
+def get_categories_breakdown() -> Optional[Dict]:
+    """Get user's categories breakdown for charts"""
+    try:
+        headers = get_auth_headers()
+        if not headers:
+            return None
+            
+        response = requests.get(
+            f"{API_URL}/progress/categories", 
+            headers=headers,
+            timeout=5
+        )
+        if response.status_code == 200:
+            return response.json()
+        elif response.status_code == 404:
+            # User has no categories yet
+            return {"categories": {}, "total": 0}
+    except Exception as e:
+        st.error(f"❌ Error fetching categories: {e}")
+        return None
+    return None
+
+def track_search_activity(claim: str) -> bool:
+    """Track search activity in user progress"""
+    try:
+        headers = {"Content-Type": "application/json"}
+        headers.update(get_auth_headers())
+        
+        if not headers.get("Authorization"):
+            return False
+        
+        response = requests.post(
+            f"{API_URL}/progress/search",
+            json={"claim": claim},
+            headers=headers,
+            timeout=5
+        )
+        return response.status_code == 200
+    except Exception:
+        # Silently fail - progress tracking shouldn't break main functionality
+        return False
+
+def track_quiz_activity(claim: str, questions_count: int = 0) -> bool:
+    """Track quiz generation activity in user progress"""
+    try:
+        headers = {"Content-Type": "application/json"}
+        headers.update(get_auth_headers())
+        
+        if not headers.get("Authorization"):
+            return False
+        
+        response = requests.post(
+            f"{API_URL}/progress/quiz",
+            json={"claim": claim, "questions_count": questions_count},
+            headers=headers,
+            timeout=5
+        )
+        return response.status_code == 200
+    except Exception:
+        # Silently fail - progress tracking shouldn't break main functionality
+        return False
+
+def track_quiz_answers(answers: List[str], correct_answers: List[str]) -> bool:
+    """Track quiz answers in user progress"""
+    try:
+        headers = {"Content-Type": "application/json"}
+        headers.update(get_auth_headers())
+        
+        if not headers.get("Authorization"):
+            return False
+        
+        response = requests.post(
+            f"{API_URL}/progress/quiz_answers",
+            json={"answers": answers, "correct_answers": correct_answers},
+            headers=headers,
+            timeout=5
+        )
+        return response.status_code == 200
+    except Exception:
+        # Silently fail - progress tracking shouldn't break main functionality
+        return False
 
 def generate_quiz(claim: str) -> Optional[Dict]:
     """Generate a quiz from a health claim"""

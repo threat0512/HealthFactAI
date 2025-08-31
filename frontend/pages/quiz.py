@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.api import search_health_claims, get_user_progress, generate_quiz, submit_quiz_answers
+from utils.api import search_health_claims, get_user_progress, generate_quiz, submit_quiz_answers, track_quiz_activity, track_quiz_answers
 from utils.state import is_authenticated
 
 def save_fact_for_user(**kwargs):
@@ -37,6 +37,11 @@ def render_quiz() -> None:
             # Store quiz data in session state
             st.session_state["current_quiz"] = quiz_data
             st.session_state["quiz_answers"] = {}
+            
+            # Track quiz generation activity
+            questions_count = len(quiz_data.get("questions", []))
+            track_quiz_activity(quiz_claim, questions_count)
+            
             # Clear the quiz claim since we've used it
             if hasattr(st.session_state, "quiz_claim"):
                 del st.session_state.quiz_claim
@@ -105,6 +110,11 @@ def render_quiz() -> None:
                             result = submit_quiz_answers(quiz_id, answers)
                         
                         if result and not result.get("error"):
+                            # Track quiz answers
+                            question_results = result.get("results", [])
+                            correct_answers = [qr.get("correct_answer", "") for qr in question_results]
+                            track_quiz_answers(answers, correct_answers)
+                            
                             # Store results and show them
                             st.session_state["quiz_results"] = result
                             st.session_state["show_results"] = True

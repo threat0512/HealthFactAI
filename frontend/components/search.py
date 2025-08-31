@@ -1,7 +1,7 @@
 import streamlit as st
 from config import CATEGORIES
 from utils.state import get_active_category, set_active_category, is_authenticated, set_page
-from utils.api import search_health_claims
+from utils.api import search_health_claims, track_search_activity
 
 def render_search() -> tuple[str, list]:
     """Render the search input, category filter chips, and handle search functionality"""
@@ -70,6 +70,9 @@ def render_search() -> tuple[str, list]:
         if results:
             search_results = results
             st.success(f"✅ Found {len(results)} result(s) for '{query}'")
+            
+            # Track search activity in background
+            track_search_activity(query.strip())
         else:
             st.info(f"🔍 No results found for '{query}'. Try rephrasing your question.")
     

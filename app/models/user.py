@@ -51,12 +51,26 @@ class User:
         self.total_facts_count += 1
     
     def get_category_breakdown(self) -> Dict[str, int]:
-        """Get count of facts by category."""
+        """Get count of facts by category, filtered to only show health categories."""
+        from app.schemas.health_categories import HealthCategory
+        
         facts = self.facts_as_list
         categories = {}
+        
+        # Only include valid health categories
+        valid_categories = {cat.value for cat in HealthCategory}
+        
         for fact in facts:
-            category = fact.get("category", "Uncategorized")
+            category = fact.get("category", "General")
+            
+            # Filter out non-health categories like "Quiz" and map to valid categories
+            if category == "Quiz" or category == "quiz_answer":
+                continue  # Skip quiz-related categories
+            elif category not in valid_categories:
+                category = "General"  # Map invalid categories to General
+            
             categories[category] = categories.get(category, 0) + 1
+        
         return categories
     
     def to_dict(self) -> Dict[str, Any]:
