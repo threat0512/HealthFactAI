@@ -8,6 +8,8 @@ from utils.state import initialize_session_state, get_current_page, is_authentic
 from components.header import render_header
 from pages.landing import render_landing
 from pages.auth import render_auth
+from pages.signup import render_signup
+from pages.welcome import render_welcome
 from pages.dashboard import render_dashboard
 from pages.categories import render_categories
 from pages.quiz import render_quiz
@@ -41,6 +43,10 @@ if current_page == "Landing":
     render_landing()
 elif current_page == "Auth":
     render_auth()
+elif current_page == "SignUp":
+    render_signup()
+elif current_page == "Welcome":
+    render_welcome()
 elif current_page == "Home":
     render_dashboard()
 elif current_page == "Categories":
