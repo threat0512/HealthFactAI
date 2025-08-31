@@ -1,15 +1,42 @@
 import streamlit as st
 from config import CATEGORIES
-from utils.state import get_active_category, set_active_category
+from utils.state import get_active_category, set_active_category, is_authenticated
+from utils.api import search_health_claims
 
-def render_search() -> str:
-    """Render the search input and category filter chips"""
+def render_search() -> tuple[str, list]:
+    """Render the search input, category filter chips, and handle search functionality"""
+    # Search input with button - better alignment
+    st.markdown("""
+        <style>
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .search-input {
+            flex: 1;
+        }
+        .search-button {
+            flex-shrink: 0;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    # Use CSS flexbox for perfect alignment
+    st.markdown('<div class="search-container">', unsafe_allow_html=True)
+    
     # Search input
     query = st.text_input(
         "", 
         placeholder="Ask about nutrition, exercise, mental health...", 
-        label_visibility="collapsed"
+        label_visibility="collapsed",
+        key="search_input"
     )
+    
+    # Search button
+    search_button = st.button("🔍 Search", type="primary")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Category chips with better styling
     st.markdown("<div style='margin: 20px 0;'>", unsafe_allow_html=True)
@@ -27,4 +54,23 @@ def render_search() -> str:
     
     st.markdown("</div>", unsafe_allow_html=True)
     
-    return query
+    # Search functionality
+    search_results = []
+    if (query and len(query.strip()) > 0) and search_button:
+        # Check if user is authenticated
+        if not is_authenticated():
+            st.error("🔐 Please log in to search for health information.")
+            return query, search_results
+        
+        # Simple loading state
+        with st.spinner("🔍 Searching..."):
+            results = search_health_claims(query.strip())
+        
+        # Show results
+        if results:
+            search_results = results
+            st.success(f"✅ Found {len(results)} result(s) for '{query}'")
+        else:
+            st.info(f"🔍 No results found for '{query}'. Try rephrasing your question.")
+    
+    return query, search_results

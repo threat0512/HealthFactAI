@@ -3,6 +3,7 @@ import requests
 from styles.theme import get_theme_colors
 from utils.state import set_user, set_page
 from config import API_URL
+from utils.state import set_auth_token
 
 
 def render_signup() -> None:
@@ -22,6 +23,7 @@ def render_signup() -> None:
             username = st.text_input("Username", placeholder="choose a username")
             password = st.text_input("Password", type="password", placeholder="pick a secure password")
             st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+            
             submitted = st.form_submit_button("Sign up", type="primary", use_container_width=True)
 
             if submitted:
@@ -42,8 +44,36 @@ def render_signup() -> None:
                             # Set minimal user in session and navigate to welcome page
                             set_user({"id": data.get("id"), "username": data.get("username"), "email": data.get("email")})
                             st.success("Account created — welcome!")
-                            set_page("Welcome")
-                            st.experimental_rerun()
+                            
+                            # After successful registration, automatically log in
+                            try:
+                                login_data = {
+                                    "username": username,
+                                    "password": password
+                                }
+                                login_resp = requests.post(f"{API_URL}/auth/login", data=login_data, timeout=8)
+                                
+                                if login_resp.status_code == 200:
+                                    login_data = login_resp.json()
+                                    access_token = login_data.get("access_token")
+                                    
+                                    if access_token:
+                                        # Set token for persistent login (24 hours by default)
+                                        set_auth_token(access_token)
+                                        set_page("Welcome")
+                                        st.rerun()
+                                    else:
+                                        st.error("Auto-login failed after registration")
+                                        set_page("Auth")
+                                        st.rerun()
+                                else:
+                                    st.error("Auto-login failed after registration")
+                                    set_page("Auth")
+                                    st.rerun()
+                            except Exception as e:
+                                st.error(f"Auto-login error: {e}")
+                                set_page("Auth")
+                                st.rerun()
                         else:
                             try:
                                 err = resp.json()

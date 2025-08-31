@@ -18,4 +18,4 @@ def render_welcome() -> None:
     with col2:
         if st.button("Start Fact-Checking", use_container_width=True, type="primary"):
             set_page("Home")
-            st.experimental_rerun()
+            st.rerun()

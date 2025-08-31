@@ -1,7 +1,7 @@
 # Frontend configuration constants
 
 # API Configuration
-API_URL = "http://127.0.0.1:8000"
+API_URL = "http://127.0.0.1:8000/api/v1"
 
 # Page Configuration
 PAGE_TITLE = "HealthFact AI"

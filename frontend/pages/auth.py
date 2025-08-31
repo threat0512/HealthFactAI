@@ -1,6 +1,8 @@
 import streamlit as st
 from styles.theme import get_theme_colors
-from utils.state import set_user, set_page, is_authenticated
+from utils.state import set_user, set_page, is_authenticated, set_auth_token
+import requests
+from config import API_URL
 
 def render_auth() -> None:
     """Render the authentication page"""
@@ -45,19 +47,76 @@ def render_auth() -> None:
             st.markdown("</div></div>", unsafe_allow_html=True)
             
             if ok:
-                # Simple authentication - in production, you'd validate credentials
-                if login_field and password:
-                    # Determine if login_field is email or username
-                    is_email = "@" in login_field
-                    if is_email:
-                        set_user({"email": login_field, "username": "", "name": "John Doe", "role": "Health Enthusiast"})
-                    else:
-                        set_user({"username": login_field, "email": "", "name": "John Doe", "role": "Health Enthusiast"})
-                    set_page("Home")
-                    st.success("✅ Successfully signed in!")
-                    st.rerun()  # Force rerun to update the UI
-                else:
+                # Validate input
+                if not login_field or not password:
                     st.error("Please enter username/email and password")
+                else:
+                    # Attempt to login with backend API
+                    try:
+                        # Use form data format for OAuth2PasswordRequestForm
+                        form_data = {
+                            "username": login_field,
+                            "password": password
+                        }
+                        
+                        response = requests.post(
+                            f"{API_URL}/auth/login",
+                            data=form_data,
+                            timeout=10
+                        )
+                        
+                        if response.status_code == 200:
+                            data = response.json()
+                            access_token = data.get("access_token")
+                            
+                            if access_token:
+                                # Set token for persistent login (24 hours by default)
+                                set_auth_token(access_token)
+                                
+                                # Set user data (we'll get more details from /me endpoint)
+                                set_user({
+                                    "username": login_field,
+                                    "email": login_field if "@" in login_field else "",
+                                    "name": "User",
+                                    "role": "Health Enthusiast"
+                                })
+                                
+                                # Try to get full user details
+                                try:
+                                    user_response = requests.get(
+                                        f"{API_URL}/auth/me",
+                                        headers={"Authorization": f"Bearer {access_token}"},
+                                        timeout=5
+                                    )
+                                    if user_response.status_code == 200:
+                                        user_data = user_response.json()
+                                        set_user({
+                                            "id": user_data.get("id"),
+                                            "username": user_data.get("username"),
+                                            "email": user_data.get("email"),
+                                            "name": user_data.get("name", "User"),
+                                            "role": "Health Enthusiast"
+                                        })
+                                except Exception:
+                                    # If we can't get user details, continue with basic info
+                                    pass
+                                
+                                set_page("Home")
+                                st.success("✅ Successfully signed in!")
+                                st.rerun()
+                            else:
+                                st.error("Invalid response from server")
+                        else:
+                            try:
+                                error_data = response.json()
+                                error_detail = error_data.get("detail", "Login failed")
+                                st.error(f"Login failed: {error_detail}")
+                            except:
+                                st.error(f"Login failed: {response.status_code}")
+                    except requests.exceptions.RequestException as e:
+                        st.error(f"Network error: {e}")
+                    except Exception as e:
+                        st.error(f"Unexpected error: {e}")
         
         # Sign up section below the form
         st.markdown(f"""
@@ -71,4 +130,4 @@ def render_auth() -> None:
         with col2:
                 if st.button("Sign Up", key="signup-btn", use_container_width=True):
                     set_page("SignUp")
-                    st.experimental_rerun()
+                    st.rerun()

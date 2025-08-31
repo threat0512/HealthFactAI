@@ -96,6 +96,50 @@ def generate_dynamic_css(colors: dict) -> str:
             border-color: {colors['accent']};
         }}
         
+        /* Search results styling */
+        .search-results {{
+            margin-top: 20px;
+            padding: 20px;
+            background: {colors['card_bg']};
+            border-radius: 16px;
+            border: 1px solid {colors['border']};
+        }}
+        
+        /* Loading animation */
+        .loading-container {{
+            text-align: center;
+            padding: 40px 20px;
+        }}
+        
+        /* Progress bar styling */
+        .stProgress > div > div > div > div {{
+            background-color: {colors['accent']} !important;
+        }}
+        
+        /* Status text styling */
+        .status-text {{
+            color: {colors['text_secondary']};
+            font-size: 16px;
+            margin: 10px 0;
+            text-align: center;
+        }}
+        
+        /* Success/Info message styling */
+        .stSuccess, .stInfo {{
+            border-radius: 12px !important;
+            border: 2px solid !important;
+        }}
+        
+        .stSuccess {{
+            border-color: #10B981 !important;
+            background-color: rgba(16, 185, 129, 0.1) !important;
+        }}
+        
+        .stInfo {{
+            border-color: #3B82F6 !important;
+            background-color: rgba(59, 130, 246, 0.1) !important;
+        }}
+        
         /* Navigation buttons */
         .nav-btn {{
             background: {colors['card_bg']} !important;

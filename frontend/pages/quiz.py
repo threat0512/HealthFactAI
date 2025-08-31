@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.api import check_health_claim, fetch_quiz_questions, search_and_verify_claim, get_user_progress
+from utils.api import check_health_claim, fetch_quiz_questions, search_health_claims, get_user_progress
 
 def save_fact_for_user(**kwargs):
     """Placeholder function - progress is tracked automatically via API"""
@@ -24,21 +24,27 @@ def render_quiz() -> None:
     with st.expander("Check a Health Claim"):
         claim = st.text_area("Enter a health claim:")
         if st.button("Check Claim") and claim.strip():
-            result = search_and_verify_claim(claim)
-            if result:
-                if result.get("is_verified"):
-                    st.success("✅ Claim verified!")
-                else:
-                    st.warning("⚠️ Claim could not be verified")
-                st.write(f"Explanation: {result.get('explanation', 'No explanation available')}")
+            results = search_health_claims(claim)
+            if results and len(results) > 0:
+                result = results[0]  # Get the first result
+                st.success("✅ Claim analyzed!")
+                st.write(f"**Explanation:** {result.get('summary', 'No explanation available')}")
+                st.write(f"**Confidence:** {result.get('confidence', 'Unknown')}")
+                
                 sources = result.get("sources", [])
-                if sources and sources[0].get("url"):
-                    st.markdown(f"[Trusted Source]({sources[0]['url']})")
+                if sources:
+                    st.write("**Sources:**")
+                    for source in sources:
+                        if source.get("url") and source.get("url") != "#":
+                            st.markdown(f"- [{source.get('name', 'Source')}]({source.get('url')})")
+                        else:
+                            st.write(f"- {source.get('name', 'Source')}")
+                
                 # Offer to save verified claim to user's profile
                 save_fact_for_user(
                     content=claim,
                     category="claim-check",
-                    source_url=sources[0].get("url") if sources else None,
+                    source_url=sources[0].get("url") if sources and sources[0].get("url") != "#" else None,
                     button_label="✅ I learned this fact!",
                 )
             else:

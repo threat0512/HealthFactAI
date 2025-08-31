@@ -4,7 +4,7 @@ import streamlit as st
 from config import PAGE_TITLE, PAGE_ICON, LAYOUT
 from styles.theme import initialize_theme
 from styles.components import generate_dynamic_css
-from utils.state import initialize_session_state, get_current_page, is_authenticated
+from utils.state import initialize_session_state, get_current_page, is_authenticated, is_token_valid, should_refresh_token, clear_user
 from components.header import render_header
 from pages.landing import render_landing
 from pages.auth import render_auth
@@ -35,6 +35,16 @@ st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
 # Render header
 render_header()
+
+# Check token validity and handle expired tokens
+if st.session_state.get("user") and st.session_state.get("access_token"):
+    if not is_token_valid():
+        # Token has expired, clear user and redirect to auth
+        clear_user()
+        st.rerun()
+    elif should_refresh_token():
+        # Token is about to expire, show warning
+        st.warning("🔑 Your session will expire soon. Please save your work.")
 
 # Main page routing
 current_page = get_current_page()
