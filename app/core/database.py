@@ -5,8 +5,8 @@ PostgreSQL is the primary choice for production, SQLite for development fallback
 import os
 from typing import Union, Optional
 import sqlite3
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import psycopg
+from psycopg.rows import dict_row
 from .config import settings
 
 class DatabaseManager:
@@ -28,15 +28,16 @@ class DatabaseManager:
         try:
             if settings.DATABASE_URL and "postgresql" in settings.DATABASE_URL.lower():
                 # Use DATABASE_URL if provided (Supabase style)
-                return psycopg2.connect(settings.DATABASE_URL)
+                return psycopg.connect(settings.DATABASE_URL, row_factory=dict_row)
             else:
                 # Use individual connection parameters
-                return psycopg2.connect(
+                return psycopg.connect(
                     host=settings.DB_HOST,
-                    database=settings.DB_NAME,
+                    dbname=settings.DB_NAME,
                     user=settings.DB_USER,
                     password=settings.DB_PASSWORD,
-                    port=settings.DB_PORT
+                    port=settings.DB_PORT,
+                    row_factory=dict_row
                 )
         except Exception as e:
             raise Exception(f"PostgreSQL connection failed: {e}")
@@ -95,9 +96,12 @@ class DatabaseManager:
             conn.commit()
             
             if settings.is_postgresql:
-                # PostgreSQL: get the last inserted ID
-                cursor.execute("SELECT LASTVAL()")
-                return cursor.fetchone()[0]
+                # PostgreSQL: get the last inserted ID using RETURNING clause or sequence
+                if "RETURNING" in command.upper():
+                    return cursor.fetchone()[0]
+                else:
+                    cursor.execute("SELECT lastval()")
+                    return cursor.fetchone()[0]
             else:
                 # SQLite: get the last inserted ID
                 return cursor.lastrowid

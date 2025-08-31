@@ -8,9 +8,6 @@ def render_auth() -> None:
     """Render the authentication page"""
     colors = get_theme_colors()
     
-    # Debug: Show current API URL prominently
-    st.error(f"🔍 DEBUG API URL: {API_URL}")
-    st.error(f"🔍 DEBUG: First part of URL: {API_URL[:30]}...")
     
     # If already authenticated, redirect to dashboard
     if is_authenticated():

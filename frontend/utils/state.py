@@ -86,7 +86,7 @@ def should_refresh_token() -> bool:
     return datetime.datetime.now() >= refresh_time
 
 def get_token_info() -> dict:
-    """Get debug information about the current token"""
+    """Get information about the current token"""
     import datetime
     token = st.session_state.get("access_token")
     expires_at = st.session_state.get("token_expires_at")
