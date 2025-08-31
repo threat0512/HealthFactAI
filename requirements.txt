@@ -66,15 +66,8 @@ weasel==0.4.1
 websockets==15.0.1
 wrapt==1.17.3
 
-# Frontend charts
-# Frontend charts
-pandas==2.1.4; python_version<"3.12"
-pandas==2.2.2; python_version>="3.12"
+# Frontend charts - NO PANDAS (removed pandas to fix Render build)
 plotly==5.24.1
-# Build dependencies for pandas
-setuptools>=65.0.0
-wheel>=0.38.0
-Cython>=3.0.0
 rank-bm25==0.2.2
 readability-lxml==0.8.1
 lxml[html_clean]==5.3.0
@@ -83,4 +76,4 @@ httpx==0.27.2
 streamlit==1.37.1
 
 # Database dependencies
-psycopg2-binary==2.9.9  # PostgreSQL adapter
+psycopg2-binary==2.9.9

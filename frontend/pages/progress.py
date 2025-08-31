@@ -1,7 +1,6 @@
 import streamlit as st
 from datetime import datetime, timedelta, date
 from typing import Dict, Optional
-import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -42,17 +41,20 @@ def create_weekly_facts_chart(progress_data: Dict, colors: Dict) -> Optional[go.
             scale_factor = facts_this_week / total_distributed if total_distributed > 0 else 0
             daily_facts = [int(fact * scale_factor) for fact in daily_facts]
         
-        df = pd.DataFrame({
-            "day": week_days,
-            "facts": daily_facts
-        })
+        # Create bar chart directly with plotly.graph_objects instead of pandas
+        fig = go.Figure(data=[
+            go.Bar(
+                x=week_days,
+                y=daily_facts,
+                marker_color=colors['accent'],
+                name="Facts"
+            )
+        ])
         
-        fig = px.bar(
-            df, 
-            x="day", 
-            y="facts", 
+        fig.update_layout(
             title="📚 Facts Learned This Week",
-            color_discrete_sequence=[colors['accent']]
+            xaxis_title="Day",
+            yaxis_title="Facts"
         )
         
         fig.update_layout(
