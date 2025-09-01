@@ -33,7 +33,7 @@ def render_signup() -> None:
                 else:
                     payload = {"email": email, "username": username, "password": password}
                     try:
-                        resp = requests.post(f"{API_URL}/auth/register", json=payload, timeout=8)
+                        resp = requests.post(f"{API_URL}/auth/register", json=payload, timeout=30)  # Increased timeout for registration
                     except Exception as e:
                         st.error(f"Network error: {e}")
                         resp = None
@@ -55,7 +55,7 @@ def render_signup() -> None:
                                     f"{API_URL}/auth/login", 
                                     data=login_data, 
                                     headers={"Content-Type": "application/x-www-form-urlencoded"},
-                                    timeout=8
+                                    timeout=30  # Increased timeout for post-registration login
                                 )
                                 
                                 if login_resp.status_code == 200:

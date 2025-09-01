@@ -64,7 +64,7 @@ def render_auth() -> None:
                             f"{API_URL}/auth/login",
                             data=form_data,
                             headers={"Content-Type": "application/x-www-form-urlencoded"},
-                            timeout=10
+                            timeout=30  # Increased timeout for authentication
                         )
                         
                         if response.status_code == 200:
@@ -88,7 +88,7 @@ def render_auth() -> None:
                                     user_response = requests.get(
                                         f"{API_URL}/auth/me",
                                         headers={"Authorization": f"Bearer {access_token}"},
-                                        timeout=5
+                                        timeout=20  # Increased timeout for user profile fetch
                                     )
                                     if user_response.status_code == 200:
                                         user_data = user_response.json()
