@@ -16,6 +16,11 @@ from pages.categories import render_categories
 from pages.quiz import render_quiz
 from pages.progress import render_progress
 
+# Fast exit for ping checks to keep the app cheap to run
+if st.query_params.get("ping") == "1":
+    st.write("ok")
+    st.stop()
+
 # Debug section - remove after fixing
 if st.sidebar.button("🐛 Debug Info"):
     st.sidebar.write(f"**API URL**: {API_URL}")
